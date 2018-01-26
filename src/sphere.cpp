@@ -6,7 +6,7 @@
 bool Sphere::Intersection(const Ray& ray, std::vector<Hit>& hits) const
 {
     // TODO
-
+ 
     // calculate discriminate 
     vec3 v = ray.endpoint - center;
     vec3 u = ray.direction; 
@@ -47,12 +47,15 @@ bool Sphere::Intersection(const Ray& ray, std::vector<Hit>& hits) const
 		hits.push_back(hit3);   
 	}   
     }
+
     return true; 
+
 }
 
 vec3 Sphere::Normal(const vec3& point) const
 {
     vec3 normal;
     // TODO: set the normal
+    normal = ((center - point) / double(radius)).normalized(); 
     return normal;
 }
