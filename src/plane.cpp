@@ -8,7 +8,8 @@
 // to record a hit with t=0 as the first entry in hits.
 bool Plane::
 Intersection(const Ray& ray, std::vector<Hit>& hits) const
-{ 
+{
+/*       
     // TODO
     double a = double(dot((ray.endpoint - x1), normal)); 
     double b = double(dot(ray.direction, normal)); 
@@ -62,11 +63,31 @@ Intersection(const Ray& ray, std::vector<Hit>& hits) const
 	return false; 
     }
 
-    return false;
+    return false; 
+*/ 
+
+double denominator;
+
+    if ((denominator = dot(normal,ray.direction)) != 0) {
+      Hit hit;
+
+      if((hit.t = -dot(normal,(ray.endpoint - x1))/(denominator)) >=0) {
+        hit.object = this;
+        if(hit.t >= 0) {
+          hit.ray_exiting = false;
+          hits.push_back(hit);
+          return true;
+        }
+      } else if(-dot(normal,(ray.endpoint-x1)) != 0) {
+                        return false;
+                               } else {
+                                       return false;
+                                             }
+                                                }
+                                             return false;
 }
 
-vec3 Plane::
-Normal(const vec3& point) const
+vec3 Plane::Normal(const vec3& point) const 
 {
-    return normal;
+	return normal; 
 }
