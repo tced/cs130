@@ -26,19 +26,18 @@ Render_World::~Render_World()
 Object* Render_World::Closest_Intersection(const Ray& ray,Hit& hit)
 {
     // TODO
-    double min_t = std::numeric_limits<double>::infinity(); 
+    //double min_t = std::numeric_limits<double>::infinity(); 
+    hit.t = std::numeric_limits<double>::infinity(); 
     Object* closest_object = 0;
-    for (size_t i = 0; i < objects.size(); ++i) {
+    for (unsigned int i = 0; i < objects.size(); ++i) {
     	std::vector<Hit> hit_list;
-	objects[i]->Intersection(ray, hit_list);
- 	for (double h = 0; h < hit_list.size(); ++h) {
-		if (hit_list[h].t > small_t) {
-		closest_object = objects[i]; 
-		hit = hit_list[h]; 	
-		min_t = hit_list[h].t;  
+	objects.at(i)->Intersection(ray, hit_list);
+ 	for (unsigned int h = 0; h < hit_list.size(); ++h) {
+		if (hit_list.at(h).t < hit.t && hit_list.at(h).t > small_t) {
+		closest_object = objects.at(i); 
+		hit = hit_list.at(h); 	
+		//min_t = hit_list[h].t;  
 		} 
-		else {
-		}  
 	} 
  	 
     }

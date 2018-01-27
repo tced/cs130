@@ -8,10 +8,10 @@ bool Sphere::Intersection(const Ray& ray, std::vector<Hit>& hits) const
     double result; 
     vec3 u = ray.direction; 
     vec3 v = ray.endpoint - center; 
-    
     result = pow(dot(u,v),2) - (dot(u,u)*(dot(v,v) - radius*radius));
-    result  = pow(dot(u,v),2) - (dot(u,u)*(dot(v,v) - pow(radius,2)));
-    
+    //double result = 4 *(dot(u,v) * dot(u,v)) - 4 * (dot(v,v) - radius * radius); 
+    double b = -1.0 * dot(u,v);
+    double c = dot(u,u);  
     Hit hit1; 
     Hit hit2;
     
@@ -22,15 +22,15 @@ bool Sphere::Intersection(const Ray& ray, std::vector<Hit>& hits) const
    
     //if there is one intersection  
      else if (result == 0){ 
-        hit1.t = (-1.0*dot(u,v) + sqrt(result)) / dot(u,u); 
+        hit1.t = (b + sqrt(result)) / c;
         hit1.ray_exiting = false;
         hits.push_back(hit1);
         return true;
      }
     //if there are two intersections
     else {
-        hit1.t = (-1.0 * dot(u,v) + sqrt(result)) / dot(u,u);
-        hit2.t = (-1.0* dot(u,v) - sqrt(result)) / dot(u,u);
+        hit1.t = (b + sqrt(result)) / c;
+        hit2.t = (b - sqrt(result)) / c;
         
         hit1.ray_exiting = false;
         hits.push_back(hit1);
