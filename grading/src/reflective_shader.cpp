@@ -7,13 +7,17 @@ vec3 Reflective_Shader::
 Shade_Surface(const Ray& ray,const vec3& intersection_point,
     const vec3& same_side_normal,int recursion_depth,bool is_exiting) const
 {
-    vec3 color, L, reflected_color; 
+    vec3 color, L, reflected_color, shader_color; 
     Ray reflected_ray;
     // TODO: determine the color
+    //reflective shader 
     for (unsigned int i = 0; i < world.lights.size(); ++i) {
         reflected_ray.direction = (world.lights.at(i)->position - intersection_point).normalized(); 
 	reflected_ray.endpoint = intersection_point * reflected_ray.direction;
-   	reflected_color = world.Cast_Ray(reflected_ray, recursion_depth); 
-     }
+   	++recursion_depth; 
+        reflected_color = world.Cast_Ray(reflected_ray, recursion_depth); 
+        shader_color = shader->Shade_Surface(ray,intersection_point, same_side_normal, recursion_depth, is_exiting); 
+    }
+    color = reflectivity * reflected_color + (1 - reflectivity) * shader_color;  
     return color;
 }
