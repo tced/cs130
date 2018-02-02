@@ -13,10 +13,10 @@ Shade_Surface(const Ray& ray,const vec3& intersection_point,
 
   //calculating ambient 
   ambient = world.ambient_color * world.ambient_intensity * color_ambient;
-   
-  //shadows not enabled 
-  if(!world.enable_shadows) {
-      for (unsigned int i = 0; i < world.lights.size(); i++){
+  
+      //shadows not enabled 
+      if(!world.enable_shadows) {
+             for (unsigned int i = 0; i < world.lights.size(); i++){
              //color of light source 
 	     light_color = world.lights.at(i)->Emitted_Light(ray)/(world.lights.at(i)->position - intersection_point).magnitude_squared();
              
@@ -30,11 +30,11 @@ Shade_Surface(const Ray& ray,const vec3& intersection_point,
              specular += pow(std::max(0.0, dot(C, R)), specular_power) * light_color * color_specular;
 
        }   
-   }  
+     }  
 
-  //shadows enabled 
-  else {
-     for (unsigned int i = 0; i < world.lights.size(); i++){
+     //shadows enabled 
+     else {
+       for (unsigned int i = 0; i < world.lights.size(); i++){
 
          // Contruct a ray from object to light
          Ray ray_object_light_source;
@@ -60,14 +60,10 @@ Shade_Surface(const Ray& ray,const vec3& intersection_point,
               specular += pow(std::max( 0.0, dot(C,R)), specular_power) * light_color * color_specular;
 
               color = ambient + diffuse + specular;
-          }
-         else {
-             diffuse += vec3(0,0,0);
-             specular += vec3(0,0,0);  
-          }
-     }
-   } 
-    
+         }
+       }
+     } 
+   //} 
    color = ambient + diffuse + specular; 
    return color;
 }

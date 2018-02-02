@@ -12,11 +12,12 @@ Shade_Surface(const Ray& ray, const vec3& intersection_point,
     vec3 refraction_color;
     double reflectance_ratio=-1;
     vec3 normal = (same_side_normal).normalized(); 
+           refraction_color = {0,0,0}; 
     
     if(!world.disable_fresnel_refraction)
     { 
        vec3 ray_D = (ray.direction).normalized(); 
-       double Ni, Nr, Ni_over_Nr, cosR, cosI; 
+       double Ni, Nr, Ni_over_Nr, cosR, cosI, cosR_sqrt; 
        if (!is_exiting) {
 	  Ni = refractive_index; 
   	  Nr = REFRACTIVE_INDICES::AIR; 
@@ -27,17 +28,16 @@ Shade_Surface(const Ray& ray, const vec3& intersection_point,
           Nr = refractive_index; 
        }      
        
-       Ni_over_Nr = Ni/Nr; 
+        Ni_over_Nr = Ni/Nr; 
         //TODO (Test 27+): Compute the refraction_color:
         // - Check if it is total internal reflection. i
         cosI = dot(-1.0 * ray_D, normal);
-        cosR = 1.0 - (Ni_over_Nr * Ni_over_Nr) * (1.0 - pow(cosI, 2.0)); 
-        cosR = sqrt(cosR);  
+        cosR = 1.0 - (pow(Ni_over_Nr, 2.0)) * (1.0 - pow(cosI, 2.0)); 
+        cosR_sqrt = sqrt(cosR);  
         //if (total internal reflection) }
         // If so update the reflectance_ratio for total internal refraction
         if (cosR <= 0) {
            reflectance_ratio = 1; 
-           refraction_color = {0,0,0}; 
         }
         //      else, follow the instructions below
         //
@@ -46,7 +46,7 @@ Shade_Surface(const Ray& ray, const vec3& intersection_point,
         //        (Test 27+): Cast the refraction ray and compute the refraction_color
         //
         else { 
-           vec3 T = Ni_over_Nr * (ray_D - dot(ray_D, normal) * normal) - cosR * normal; 
+           vec3 T = (Ni/Nr) * (ray_D - dot(ray_D, normal) * normal) - cosR_sqrt * normal; 
 	   Ray refraction_ray; 
            refraction_ray.endpoint = intersection_point; 
 	   refraction_ray.direction = T; 
@@ -54,8 +54,10 @@ Shade_Surface(const Ray& ray, const vec3& intersection_point,
 	   refraction_color = world.Cast_Ray(refraction_ray, recursion_depth); 
 
 	   double R_par, R_per; 
-           R_par = pow(((Nr * cosI) - (Ni * cosR)) / ((Nr * cosI) + (Ni * cosR)), 2.0); 
-           R_per = pow(((Ni * cosI) - (Nr * cosR)) / ((Ni * cosI) + (Nr * cosR)), 2.0);
+           R_par = ((Nr * cosI) - (Ni * cosR_sqrt)) / ((Nr * cosI) + (Ni * cosR_sqrt)); 
+           R_par = pow(R_par, 2); 
+           R_per = ((Ni * cosI) - (Nr * cosR_sqrt)) / ((Ni * cosI) + (Nr * cosR_sqrt));
+           R_per = pow(R_per, 2); 
        
            reflectance_ratio = (R_par + R_per) / 2.0; 
         }
@@ -65,8 +67,7 @@ Shade_Surface(const Ray& ray, const vec3& intersection_point,
         //TODO:(Test 26+): Compute reflection_color:
         // - Cast Reflection Ray andd get color
         Ray reflected_ray;
-        vec3 D;  
- 	D = ray.direction; 
+        vec3 D = ray.direction; 
  	reflected_ray.endpoint = intersection_point;
 	reflected_ray.direction = D - 2 * dot(D, same_side_normal) * same_side_normal;
 	reflection_color = world.Cast_Ray(reflected_ray, recursion_depth);

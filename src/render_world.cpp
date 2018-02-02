@@ -84,7 +84,7 @@ vec3 Render_World::Cast_Ray(const Ray& ray,int recursion_depth)
 	color = obj->material_shader->Shade_Surface(ray, intersection, normal, recursion_depth, h.ray_exiting);
     }
     else {
-  	color = background_shader->Shade_Surface(ray,dummy,dummy,1, false); 
+  	color = background_shader->Shade_Surface(ray,dummy,dummy,recursion_depth, h.ray_exiting); 
     }
 
     // determine the color here
