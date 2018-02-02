@@ -10,7 +10,7 @@ Shade_Surface(const Ray& ray,const vec3& intersection_point,
     vec3 color, D, reflected_color, shader_color; 
     //compute reflected ray
     Ray reflected_ray; 
-    D = ray.direction;  
+    D = ray.direction.normalized();  
     //reflected_ray.direction = -ray.direction;
     reflected_ray.endpoint = intersection_point; 
     reflected_ray.direction = D - 2 * dot(D, same_side_normal) * same_side_normal; 

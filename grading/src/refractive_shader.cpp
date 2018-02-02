@@ -10,57 +10,56 @@ Shade_Surface(const Ray& ray, const vec3& intersection_point,
     //       Use is_exiting to decide the refractive indices on the ray and transmission sides
     vec3 reflection_color;
     vec3 refraction_color;
-    
-    vec3 D = ray.direction.normalized(); 
-    vec3 I = intersection_point; 
-    vec3 N = same_side_normal; 
-    vec3 R = (D - 2.0 * dot(D,N)*N); 
-
     double reflectance_ratio=-1;
+    vec3 normal = (same_side_normal).normalized(); 
+    
     if(!world.disable_fresnel_refraction)
-    {
-	Ray rayrefract; 
-   	vec3 R_norm = R.normalized(); 
-	double Nr = refractive_index; 
-	double Ni = 1; 
-	double Ns = Ni/Nr; 
-
-	if (is_exiting) { 
-	   Ns = Nr/Ni; 
-	}	
-
-	double cos_angle_incidence = dot(N, R_norm) / (N.magnitude() * R_norm.magnitude());
-	double cos_angle_refraction_squared = 1 - (pow(Ns,2) * (1 - pow(cos_angle_incidence,2))); 
-	double cos_angle_refraction = sqrt(cos_angle_refraction_squared);
-  
-	if (cos_angle_refraction_squared < 0) {
-	   reflectance_ratio = 1; 
-	   refraction_color = {0,0,0};  
-	}
-	else { 
-	   vec3 Refract = Ns * (D - dot(D,N) * N ) - cos_angle_refraction * N; 
-	   rayrefract.endpoint = I; 
-	   rayrefract.direction = Refract; 
-	   recursion_depth++;
-	   refraction_color = world.Cast_Ray(rayrefract, recursion_depth); 
-	  
-           double RII = pow((Nr*cos_angle_incidence - Ni*cos_angle_refraction)/(Nr*cos_angle_incidence + Ni*cos_angle_refraction),2); 
-	   double RT = pow((Ni*cos_angle_incidence - Nr*cos_angle_refraction)/(Ni*cos_angle_incidence + Nr*cos_angle_refraction),2); 
-	   reflectance_ratio = (RII + RT)/2; 
-        }
+    { 
+       vec3 ray_D = (ray.direction).normalized(); 
+       double Ni, Nr, Ni_over_Nr, cosR, cosI; 
+       if (!is_exiting) {
+	  Ni = refractive_index; 
+  	  Nr = REFRACTIVE_INDICES::AIR; 
+       }
+ 
+       else {
+	  Ni = REFRACTIVE_INDICES::AIR; 
+          Nr = refractive_index; 
+       }      
+       
+       Ni_over_Nr = Ni/Nr; 
         //TODO (Test 27+): Compute the refraction_color:
         // - Check if it is total internal reflection. i
+        cosI = dot(-1.0 * ray_D, normal);
+        cosR = 1.0 - (Ni_over_Nr * Ni_over_Nr) * (1.0 - pow(cosI, 2.0)); 
+        cosR = sqrt(cosR);  
         //if (total internal reflection) }
-        //      If so update the reflectance_ratio for total internal refraction
-        //
-        
+        // If so update the reflectance_ratio for total internal refraction
+        if (cosR <= 0) {
+           reflectance_ratio = 1; 
+           refraction_color = {0,0,0}; 
+        }
         //      else, follow the instructions below
         //
         //        (Test 28+): Update the reflectance_ratio 
         //
         //        (Test 27+): Cast the refraction ray and compute the refraction_color
         //
-    }
+        else { 
+           vec3 T = Ni_over_Nr * (ray_D - dot(ray_D, normal) * normal) - cosR * normal; 
+	   Ray refraction_ray; 
+           refraction_ray.endpoint = intersection_point; 
+	   refraction_ray.direction = T; 
+           ++recursion_depth; 
+	   refraction_color = world.Cast_Ray(refraction_ray, recursion_depth); 
+
+	   double R_par, R_per; 
+           R_par = pow(((Nr * cosI) - (Ni * cosR)) / ((Nr * cosI) + (Ni * cosR)), 2.0); 
+           R_per = pow(((Ni * cosI) - (Nr * cosR)) / ((Ni * cosI) + (Nr * cosR)), 2.0);
+       
+           reflectance_ratio = (R_par + R_per) / 2.0; 
+        }
+   }
 
     if(!world.disable_fresnel_reflection){
         //TODO:(Test 26+): Compute reflection_color:
