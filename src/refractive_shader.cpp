@@ -10,13 +10,17 @@ Shade_Surface(const Ray& ray, const vec3& intersection_point,
     //       Use is_exiting to decide the refractive indices on the ray and transmission sides
     vec3 reflection_color;
     vec3 refraction_color;
+    
+
     double reflectance_ratio=-1;
     if(!world.disable_fresnel_refraction)
     {
-        //TODO (Test 27+): Compute the refraction_color:
-        // - Check if it is total internal reflection. 
+	        //TODO (Test 27+): Compute the refraction_color:
+        // - Check if it is total internal reflection. i
+        //if (total internal reflection) }
         //      If so update the reflectance_ratio for total internal refraction
         //
+        
         //      else, follow the instructions below
         //
         //        (Test 28+): Update the reflectance_ratio 
